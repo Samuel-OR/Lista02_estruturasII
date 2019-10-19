@@ -45,16 +45,17 @@ int removeAresta(Grafo *gr, int orig, int dest, int eh_digrafo){
 
 	gr->grau[orig]--;
 	gr->arestas[orig][i] = gr->arestas[orig][gr->grau[orig]];
-	if(eh_ponderado)
+	if(gr->eh_ponderado)
 		gr->pesos[orig][i] = gr->pesos[orig][gr->grau[orig]];
 	if(eh_digrafo == 0)
-		removeAresta(gr,des,orig,1);
+		removeAresta(gr,dest,orig,1);
 	return 1;
 }
 
 
 
 int main(){
+	Grafo *gr;
 	
 	int insereAresta(Grafo *gr, int orig, int dest,int eh_digrafo, float peso);
 	insereAresta(gr,0,1,0,0);
