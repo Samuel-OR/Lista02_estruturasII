@@ -98,31 +98,36 @@ void liberar_Grafo(Grafo *gr){
 }
 
 //Função auxiliar que faz cálculo da busca
-void buscaProfundidade(Grafo *gr, int ini, int *visitado, int cont){
+void buscaProfundidade(Grafo *gr, int ini, int *visitado, int cont, int *visitados_pesos){
 
 	int i;
 	visitado[ini] = cont;
 	for(i=0; i<gr->grau[ini]; i++){
-		if(!visitado[gr->arestas[ini][i]])
-			buscaProfundidade(gr, gr->arestas[ini][i], visitado, cont+1);
+		if(!visitado[gr->arestas[ini][i]]){
+			visitados_pesos[gr->arestas[ini][i]] += gr->pesos[ini][i]+visitados_pesos[ini];
+			buscaProfundidade(gr, gr->arestas[ini][i], visitado, cont+1, visitados_pesos);
+		}
 	}
 }
 
 //Função principal: Faz a interface com o usuário
-void buscaProfundidade_Grafo(Grafo *gr, int ini, int *visitado){
+void buscaProfundidade_Grafo(Grafo *gr, int ini, int *visitado, int *visitados_pesos){
 
 	int i, cont = 1;
 	for(i=0; i<gr->nro_vertices; i++)
 		visitado[i] = 0;
+		visitados_pesos[i] = 0;
 
-	buscaProfundidade(gr, ini, visitado, cont);
+	buscaProfundidade(gr, ini, visitado, cont, visitados_pesos);
 }
 
-void buscaLargura_Grafo(Grafo *gr, int ini, int *visitado){
+void buscaLargura_Grafo(Grafo *gr, int ini, int *visitado, int *visitados_pesos){
 	int i, vert, NV, cont=1, *fila, IF=0, FF=0;
 
-	for(i=0; i<gr->nro_vertices; i++)
+	for(i=0; i<gr->nro_vertices; i++){
 		visitado[i] = 0;
+		visitados_pesos[i] = 0;
+	}
 	NV = gr->nro_vertices;
 	fila = (int*) malloc(NV * sizeof(int));
 	FF++;
@@ -137,19 +142,18 @@ void buscaLargura_Grafo(Grafo *gr, int ini, int *visitado){
 				FF = (FF+1)%NV;
 				fila[FF] = gr->arestas[vert][i];
 				visitado[gr->arestas[vert][i]] = cont;
+				visitados_pesos[gr->arestas[vert][i]] += gr->pesos[vert][i]+visitados_pesos[vert];
 			}
 		}
 	}
 	free(fila);
 }
 
-
-
 int main(){
  	
  	int op, eh_ponderado, grau_max, nro_vertices;
  	int orig, dest, eh_digrafo, peso, Inicial;
- 	int *visitados;
+ 	int *visitados, *visitados_pesos;
 	Grafo *gr = NULL;
 
 	while(1){
@@ -198,13 +202,32 @@ int main(){
 				printf("Aresta INSERIDA com Sucesso.\n");
 				*/
 
-				insereAresta(gr, 0, 1, 1, 0);
-				insereAresta(gr, 1, 3, 1, 0);
-				insereAresta(gr, 1, 2, 1, 0);
-				insereAresta(gr, 2, 4, 1, 0);
-				insereAresta(gr, 3, 0, 1, 0);
-				insereAresta(gr, 3, 4, 1, 0);
-				insereAresta(gr, 4, 1, 1, 0);
+				/*
+				TESTE SLIDE
+				insereAresta(gr, 0, 1, 1, 1);
+				insereAresta(gr, 1, 3, 1, 1);
+				insereAresta(gr, 1, 2, 1, 1);
+				insereAresta(gr, 2, 4, 1, 1);
+				insereAresta(gr, 3, 0, 1, 1);
+				insereAresta(gr, 3, 4, 1, 1);
+				insereAresta(gr, 4, 1, 1, 1);
+				*/
+				insereAresta(gr, 0, 2, 1, 1);
+				insereAresta(gr, 0, 4, 1, 1);
+				insereAresta(gr, 1, 3, 1, 1);
+				insereAresta(gr, 2, 7, 1, 1);
+				insereAresta(gr, 3, 6, 1, 1);
+				insereAresta(gr, 4, 5, 1, 1);
+				insereAresta(gr, 4, 7, 1, 1);
+				insereAresta(gr, 5, 1, 1, 1);
+				insereAresta(gr, 5, 4, 1, 1);
+				insereAresta(gr, 5, 7, 1, 1);
+				insereAresta(gr, 6, 0, 1, 1);
+				insereAresta(gr, 6, 2, 1, 1);
+				insereAresta(gr, 6, 4, 1, 1);
+				insereAresta(gr, 7, 3, 1, 1);
+				insereAresta(gr, 7, 5, 1, 1);
+		
 				break;
 			case 3:
 
@@ -228,17 +251,21 @@ int main(){
 				
 				scanf("%d", &Inicial);
 				visitados = (int*) calloc(nro_vertices, sizeof(int));
+				visitados_pesos = (int*) calloc(nro_vertices, sizeof(int));
 
-				buscaProfundidade_Grafo(gr, Inicial, visitados);
+				buscaProfundidade_Grafo(gr, Inicial, visitados, visitados_pesos);
 
 				printf("VISITADOS: ");
 				for(int i=0; i<nro_vertices; i++){
-					printf("[%d - %d] ",i, visitados[i] );
+					printf("[%d - %d {%d}] ",i, visitados[i], visitados_pesos[i] );
 				}
 				printf("\n");
 
 				free(visitados);
 				visitados = NULL;
+
+				free(visitados_pesos);
+				visitados_pesos = NULL;
 				printf("Busca em PROFUNDIDADE realizada com Sucesso.\n");
 				break;
 
@@ -247,17 +274,21 @@ int main(){
 				
 				scanf("%d", &Inicial);
 				visitados = (int*) calloc(nro_vertices, sizeof(int));
+				visitados_pesos = (int*) calloc(nro_vertices, sizeof(int));
 
-				buscaLargura_Grafo(gr, Inicial, visitados);
+				buscaLargura_Grafo(gr, Inicial, visitados, visitados_pesos);
 
 				printf("VISITADOS: ");
 				for(int i=0; i<nro_vertices; i++){
-					printf("[%d - %d] ",i, visitados[i] );
+					printf("[%d - %d {%d}] ",i, visitados[i], visitados_pesos[i] );
 				}
 				printf("\n");
 
 				free(visitados);
 				visitados = NULL;
+
+				free(visitados_pesos);
+				visitados_pesos = NULL;
 				printf("Busca em LARGURA realizada com Sucesso.\n");
 				break;
 			case 7:
