@@ -11,9 +11,6 @@ typedef struct{
 	int grau_max;
 }Grafo;
 
-
-
-
 //-------------------------PILHA---------------------------
 typedef struct pi PILHA;
 struct pi{
