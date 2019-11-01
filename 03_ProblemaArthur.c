@@ -18,6 +18,12 @@ struct pi{
 	float arestaAnt;
 	PILHA *prox, *inicio, *fim;
 };
+//struct para guardar os caminhos
+typedef struct m_pilha maior_pilha;
+struct m_pilha{
+	int qtd_elementos;
+	PILHA *caminho;
+};
 
 PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt){
 	PILHA *novo;
@@ -51,7 +57,6 @@ void mostrarPilha(PILHA *pilha){
 			//printf("%d{%.2f} - ",pilha->vertice, pilha->arestaAnt );
 			printf("%d - ",pilha->vertice );
 		}
-		//printf("%d{%.2f}]\n",pilha->vertice, pilha->arestaAnt );
 		printf("%d]\n",pilha->vertice );
 	}
 }
@@ -161,44 +166,63 @@ void liberar_Grafo(Grafo *gr){
 }
 
 //Função auxiliar que faz cálculo da busca
-void buscaProfundidade(Grafo *gr, int ini, int *visitado, int cont, float *visitados_pesos, PILHA *pilha){
+void buscaProfundidade(Grafo *gr, int ini, int *visitado, int cont, float *visitados_pesos, PILHA *pilha, float valorP, maior_pilha *maior_p){
 
 	int i;
 	visitado[ini] = cont;
 	pilha = inserirPilha(pilha,ini, 0);
-	//mostrarPilha(pilha);
-	//printf("*[%d %d]\n", ini, visitado[ini]);
-	//mostrarPilha(pilha);
+
 	for(i=0; i<gr->grau[ini]; i++){
-		if(!visitado[gr->arestas[ini][i]]){
-			visitados_pesos[gr->arestas[ini][i]] += gr->pesos[ini][i]+visitados_pesos[ini];
-			buscaProfundidade(gr, gr->arestas[ini][i], visitado, cont+1, visitados_pesos, pilha);
-			
-			//printf("\t-[%d %d]\n", ini, visitado[ini]);
-			//mostrarPilha(pilha);
-			printf("Peso: %f\n",visitados_pesos[gr->arestas[ini][i]]);
+		if((!visitado[gr->arestas[ini][i]]) && (valorP - gr->pesos[ini][i])>=0){
+			//visitados_pesos[gr->arestas[ini][i]] += gr->pesos[ini][i]+visitados_pesos[ini];
+			buscaProfundidade(gr, gr->arestas[ini][i], visitado, cont + 1, visitados_pesos, pilha, (valorP - gr->pesos[ini][i]), maior_p);
+
+			//printf("Peso: %.2f\n",visitados_pesos[gr->arestas[ini][i]]);
 			visitados_pesos[gr->arestas[ini][i]] -= gr->pesos[ini][i]+visitados_pesos[ini];
 		}
 	}
-	mostrarPilha(pilha);
+
+	if(cont>maior_p->qtd_elementos){
+		free(maior_p->caminho);
+		maior_p->caminho=NULL;
+		copiarPilha(&pilha,&maior_p->caminho);
+		maior_p->qtd_elementos=cont;
+	}
+
 	pilha = removerPilha(pilha);
-	//mostrarPilha(pilha);
-
-
+	//pilha = removerPilha(pilha);
 	visitado[ini] = 0;
 }
 
-//Função principal: Faz a interface com o usuário
-void buscaProfundidade_Grafo(Grafo *gr, int ini, int *visitado, float *visitados_pesos){
+void copiarPilha(PILHA **p1,PILHA **p2){
+	PILHA *aux = (PILHA *)malloc(sizeof(PILHA));
+	if(*p1 == NULL){
+        *p2 = NULL;
+    }else{
+        copiarPilha(&(*p1)->prox,p2);
+        aux->vertice = (*p1)->vertice;
+        aux->prox=*p2;
+        *p2 = aux;
+    }
+}
 
-	PILHA *pilha = NULL;
+
+//Função principal: Faz a interface com o usuário
+void buscaProfundidade_Grafo(Grafo *gr, int ini, int *visitado, float *visitados_pesos, float valorP, maior_pilha *maior_p){
+
+	PILHA *pilha = (PILHA*)malloc(sizeof(PILHA));
+	pilha = NULL;
 	int i, cont = 1;
 	for(i=0; i<gr->nro_vertices; i++)
 		visitado[i] = 0;
-		visitados_pesos[i] = 0;
+		//visitados_pesos[i] = 0;
 
-	buscaProfundidade(gr, ini, visitado, cont, visitados_pesos, pilha);
+		buscaProfundidade(gr, ini, visitado, cont, visitados_pesos, pilha, valorP, maior_p);
+
+		mostrarPilha(maior_p->caminho);
 }
+
+
 
 void buscaLargura_Grafo(Grafo *gr, int ini, int *visitado, float *visitados_pesos){
 	int i, vert, NV, cont=1, *fila, IF=0, FF=0;
@@ -234,7 +258,12 @@ int main(){
  	int orig, dest, eh_digrafo, peso, Inicial;
  	int *visitados;
  	float *visitados_pesos;
+	float valorP;
 	Grafo *gr = NULL;
+
+	maior_pilha *maior_p = (maior_pilha*)malloc(sizeof(maior_pilha));
+	maior_p->qtd_elementos = 0;
+	maior_p->caminho = NULL;
 
 	while(1){
 		printf("-----MENU-----\n");
@@ -350,25 +379,28 @@ int main(){
 
 				break;
 			case 5:
-				printf("Vertice Inicial: ");
 				
+				printf("Vertice Inicial: ");
 				scanf("%d", &Inicial);
+
+				printf("Informe o valor que deseja pagar: ");
+				scanf("%f",&valorP);
 				visitados = (int*) calloc(nro_vertices, sizeof(int));
 				visitados_pesos = (float*) calloc(nro_vertices, sizeof(float));
 
-				buscaProfundidade_Grafo(gr, Inicial, visitados, visitados_pesos);
-
-				printf("VISITADOS: ");
+				buscaProfundidade_Grafo(gr, Inicial, visitados, visitados_pesos, valorP, maior_p);
+				//mostrarPilha(maior_p->caminho);
+				/*printf("VISITADOS: ");
 				for(int i=0; i<nro_vertices; i++){
 					printf("[%d - %d {%f}]\n",i, visitados[i], visitados_pesos[i] );
 				}
-				printf("\n");
+				printf("\n");*/
 
-				free(visitados);
+				/*free(visitados);
 				visitados = NULL;
 
 				free(visitados_pesos);
-				visitados_pesos = NULL;
+				visitados_pesos = NULL;*/
 				printf("Busca em PROFUNDIDADE realizada com Sucesso.\n");
 				break;
 
