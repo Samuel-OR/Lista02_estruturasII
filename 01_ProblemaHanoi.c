@@ -80,18 +80,18 @@ Grafo* cria_Grafo(int nro_vertices, int grau_max, int eh_ponderado){
 	if( gr != NULL){
 		int i;
 		gr->nro_vertices = nro_vertices;
-		gr->grau_max = grau_max;
 		gr->eh_ponderado = (eh_ponderado != 0) ? 1:0;
-		gr->grau=(int*)calloc(nro_vertices, sizeof(int));
 		
+		gr->grau=(int*)calloc(nro_vertices, sizeof(int));
+	
 		gr->arestas = (int**)malloc(nro_vertices*sizeof(int*));
 		for(i=0; i<nro_vertices; i++){
-			gr->arestas[i] = (int*)malloc(grau_max*sizeof(int*));
+			gr->arestas[i] = (int*)malloc(nro_vertices*sizeof(int*));
 			
 			if(gr->eh_ponderado == 1){
 				gr->pesos = (float**)malloc(nro_vertices*sizeof(float*));
 				for(int j=0; j<nro_vertices; j++){
-					gr->pesos[j] = (float*)malloc(grau_max*sizeof(float));
+					gr->pesos[j] = (float*)malloc(nro_vertices*sizeof(float));
 				}
 			}
 		}

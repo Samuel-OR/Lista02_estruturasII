@@ -205,13 +205,13 @@ void printEstado(int *atual){
                     (**gr).grau[origem-1]++;
 
                     if(!ehDigrafo){
-                        inserirAresta(gr, destino, origem, peso, 1);
+                        inserirAresta(gr, d5estino, origem, peso, 1);
                     }
                 }
             }
         }
     }
-    
+
     int comparaEstado(int *estado1, int *estado2, int tamanho){
         int temAresta = 0;
 
@@ -286,7 +286,7 @@ Fila *enqueue(Fila *fila, int vertice){
     Fila *aux;
     if(fila != NULL){
         for(aux = fila; aux != NULL && aux->prox != NULL; aux = aux->prox);
-
+ 
         if(aux == NULL) fila = elemento;
         else aux->prox = elemento;
     }
