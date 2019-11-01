@@ -50,10 +50,9 @@ PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt){
 }
 
 void mostrarPilha(PILHA *pilha){
-	if(pilha!=NULL){
+	if(pilha != NULL){
 		mostrarPilha(pilha->prox);
 		printf("%d ", pilha->vertice);
-
 	}
 }
 
