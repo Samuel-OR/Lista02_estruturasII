@@ -18,7 +18,8 @@ struct pi{
 	float arestaAnt;
 	PILHA *prox, *inicio, *fim;
 };
-//struct para guardar os caminhos
+
+//struct para guardar os caminhos possíveis
 typedef struct m_pilha maior_pilha;
 struct m_pilha{
 	int qtd_elementos;
@@ -53,10 +54,9 @@ void mostrarPilha(PILHA *pilha){
 		//printf("Pilha Vazia.\n");
 	}else{
 		printf("Caminho: [");
-		for(;pilha->prox != NULL; pilha = pilha->prox){
-			//printf("%d{%.2f} - ",pilha->vertice, pilha->arestaAnt );
+		for(;pilha->prox != NULL; pilha = pilha->prox)
 			printf("%d - ",pilha->vertice );
-		}
+
 		printf("%d]\n",pilha->vertice );
 	}
 }
@@ -72,7 +72,6 @@ PILHA *removerPilha(PILHA *pilha){
 		aux->inicio = pilha->prox;
 	}
 	aux->inicio = pilha->prox;
-	//printf("Removido.\n");
 	return pilha->prox;
 }
 //---------------------------------------------------------
@@ -194,18 +193,6 @@ void buscaProfundidade(Grafo *gr, int ini, int *visitado, int cont, float *visit
 	visitado[ini] = 0;
 }
 
-void copiarPilha(PILHA **p1,PILHA **p2){
-	PILHA *aux = (PILHA *)malloc(sizeof(PILHA));
-	if(*p1 == NULL){
-        *p2 = NULL;
-    }else{
-        copiarPilha(&(*p1)->prox,p2);
-        aux->vertice = (*p1)->vertice;
-        aux->prox=*p2;
-        *p2 = aux;
-    }
-}
-
 
 //Função principal: Faz a interface com o usuário
 void buscaProfundidade_Grafo(Grafo *gr, int ini, int *visitado, float *visitados_pesos, float valorP, maior_pilha *maior_p){
@@ -217,11 +204,22 @@ void buscaProfundidade_Grafo(Grafo *gr, int ini, int *visitado, float *visitados
 		visitado[i] = 0;
 		//visitados_pesos[i] = 0;
 
-		buscaProfundidade(gr, ini, visitado, cont, visitados_pesos, pilha, valorP, maior_p);
+	buscaProfundidade(gr, ini, visitado, cont, visitados_pesos, pilha, valorP, maior_p);
 
-		mostrarPilha(maior_p->caminho);
+	mostrarPilha(maior_p->caminho);
 }
 
+void copiarPilha(PILHA **p1,PILHA **p2){
+	PILHA *aux = (PILHA *)malloc(sizeof(PILHA));
+	if(*p1 == NULL){
+        *p2 = NULL;
+    }else{
+        copiarPilha(&(*p1)->prox,p2);
+        aux->vertice = (*p1)->vertice;
+        aux->prox=*p2;
+        *p2 = aux;
+    }
+}
 
 
 void buscaLargura_Grafo(Grafo *gr, int ini, int *visitado, float *visitados_pesos){
@@ -270,7 +268,7 @@ int main(){
 		printf("[1]-Criar/Reiniciar Grafo\n");
 		printf("[2]-Inserir Aresta\n");
 		printf("[3]-Mostrar\n");
-		printf("[4]-Remover\n");
+		//printf("[4]-Remover\n");
 		printf("[5]-Busca Profundidade\n");
 		printf("[6]-Busca Largura\n");
 		printf("[7]-Liberar\n");
@@ -364,7 +362,7 @@ int main(){
 			case 3:
 
 				break;
-			case 4:
+			/*case 4:
 				printf("Vertice de Origem: ");
 				scanf("%d", &orig);
 
@@ -377,7 +375,7 @@ int main(){
 				removeAresta(gr, orig, dest, eh_digrafo);
 				printf("Aresta REMOVIDA com Sucesso.\n");
 
-				break;
+				break;*/
 			case 5:
 				
 				printf("Vertice Inicial: ");
