@@ -1,6 +1,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#define discos 4
+#define pinos 3
+
 
 typedef struct{
 	int nro_vertices;
@@ -11,68 +15,6 @@ typedef struct{
 	int grau_max;
 }Grafo;
 
-//-------------------------PILHA---------------------------
-typedef struct pi PILHA;
-struct pi{
-	int vertice;
-	float arestaAnt;
-	PILHA *prox, *inicio, *fim;
-};
-
-PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt){
-	PILHA *novo;
-	novo = (PILHA*) malloc(sizeof(PILHA));;
-	novo->vertice = vertice;
-	novo->arestaAnt = arestaAnt;
-
-	if(pilha==NULL){
-		novo->inicio = novo;
-		novo->fim = novo;
-		return novo;
-	}
-	novo->prox = pilha;
-	novo->fim = pilha->fim;
-
-	PILHA *aux = pilha;
-	do{
-		aux->inicio = novo;
-		aux = aux->prox;
-	}while(aux!=NULL);
-	
-	return novo;
-}
-
-void mostrarPilha(PILHA *pilha){
-	if(pilha==NULL){
-		//printf("Pilha Vazia.\n");
-	}else{
-		printf("Caminho: [");
-		for(;pilha->prox != NULL; pilha = pilha->prox){
-			//printf("%d{%.2f} - ",pilha->vertice, pilha->arestaAnt );
-			printf("%d - ",pilha->vertice );
-		}
-		//printf("%d{%.2f}]\n",pilha->vertice, pilha->arestaAnt );
-		printf("%d]\n",pilha->vertice );
-	}
-}
-
-PILHA *removerPilha(PILHA *pilha){
-	if(pilha==NULL){
-		//printf("Fila Vazia.\n");
-		return pilha;
-	}
-
-	PILHA *aux;
-	for(aux = pilha; aux->prox != NULL; aux= aux->prox){
-		aux->inicio = pilha->prox;
-	}
-	aux->inicio = pilha->prox;
-	//printf("Removido.\n");
-	return pilha->prox;
-}
-//---------------------------------------------------------
-
-
 Grafo* cria_Grafo(int nro_vertices, int grau_max, int eh_ponderado){
 	Grafo *gr;
 	gr = (Grafo*) malloc(sizeof(Grafo));
@@ -81,12 +23,11 @@ Grafo* cria_Grafo(int nro_vertices, int grau_max, int eh_ponderado){
 		int i;
 		gr->nro_vertices = nro_vertices;
 		gr->eh_ponderado = (eh_ponderado != 0) ? 1:0;
-		
+
 		gr->grau=(int*)calloc(nro_vertices, sizeof(int));
-	
 		gr->arestas = (int**)malloc(nro_vertices*sizeof(int*));
 		for(i=0; i<nro_vertices; i++){
-			gr->arestas[i] = (int*)malloc(nro_vertices*sizeof(int*));
+			gr->arestas[i] = (int*)malloc(grau_max*sizeof(int*));
 			
 			if(gr->eh_ponderado == 1){
 				gr->pesos = (float**)malloc(nro_vertices*sizeof(float*));
@@ -102,22 +43,21 @@ Grafo* cria_Grafo(int nro_vertices, int grau_max, int eh_ponderado){
 int insereAresta(Grafo *gr, int orig, int dest, int eh_digrafo, float peso){
 	int resul = 0;
 	if(gr != NULL){
-		if(( orig >= 0 && orig < gr->nro_vertices) || (dest >= 0 && dest < gr->nro_vertices)){
-			
-			gr->arestas[orig][gr->grau[orig]] = dest;
+		if(( orig > 0 && orig <= gr->nro_vertices) || (dest > 0 && dest <= gr->nro_vertices)){		
+			gr->arestas[orig-1][gr->grau[orig-1]] = dest;
 			if(gr->eh_ponderado)
-				gr->pesos[orig][gr->grau[orig]] = peso;
-			gr->grau[orig]++;
+				gr->pesos[orig-1][gr->grau[orig-1]] = peso;
+			gr->grau[orig-1]++;
 
 			if(eh_digrafo == 0)
 				insereAresta(gr,dest,orig,1,peso);
 			resul = 1;
 		}
 	}
-
 	return resul;
 }
 
+/*
 int removeAresta(Grafo *gr, int orig, int dest, int eh_digrafo){
 	int resul = 0;
 
@@ -159,139 +99,107 @@ void liberar_Grafo(Grafo *gr){
 		free(gr);
 	}
 }
+*/
+
+int **gerarPossibilidades(int possibilidades){
+	int cont=0;
+	int **estadoTorre = malloc(sizeof(int*)*possibilidades);;
+	for(int x=0;x< pinos ;x++){
+		for(int y=0;y< pinos;y++){
+			for(int z=0;z<pinos;z++){
+				for(int w=0;w<pinos; w++){
+					estadoTorre[cont] =  malloc(sizeof(int)*discos);
+					estadoTorre[cont][0] = x+1;
+					estadoTorre[cont][1] = y+1;
+					estadoTorre[cont][2] = z+1;
+					estadoTorre[cont][3] = w+1;
+					cont++;
+				}
+			}
+		}
+	}
+	return estadoTorre;
+}
+
+int qtdMovimentos(int* estadoTorre1, int* estadoTorre2){
+	int cont = 0;
+	for (int x=0; x < discos; x++){
+		if(estadoTorre2[x] != estadoTorre1[x])
+			cont++;
+	}
+	return cont;
+}
+
+int posMovimento(int* estadoTorre1, int* estadoTorre2){
+	int pos = -1;
+	for (int x=0; x < discos; x++){
+		if(estadoTorre2[x] != estadoTorre1[x])
+			pos = x;
+	}
+	return pos;
+}
+
+int discoMenorAcima(int* estadoTorre, int pos){
+	int resul = 1;
+	for (int x=pos+1; x < discos; x++){
+		if(estadoTorre[x] == estadoTorre[pos])
+			resul = 0;
+	}
+	return resul;
+}
+
+int compararEstadoTorre(int* estadoTorre1, int* estadoTorre2){
+	int resul = 0;
+	if( qtdMovimentos(estadoTorre1, estadoTorre2)==1 ){
+		int pos = posMovimento(estadoTorre1, estadoTorre2);
+		if(  pos != -1){
+			if(discoMenorAcima(estadoTorre1, pos) == 1){
+				if(discoMenorAcima(estadoTorre2, pos) == 1){
+					resul = 1;
+				}
+
+			}
+		}
+	}
+	return resul;
+}
+
+void construirGrafo(Grafo *grafo, int **estadoTorre, int possibilidades){
+	int aux =0 ;
+	for(int x = 0; x<possibilidades; x++){
+		for(int y = 0; y<possibilidades; y++){
+			if(compararEstadoTorre(estadoTorre[x], estadoTorre[y]) == 1){
+				insereAresta(grafo, x+1, y+1, 1, 0);
+			}
+		}
+
+	}
+}
+
 
 int main(){
  	
- 	int op, eh_ponderado, grau_max, nro_vertices;
- 	int orig, dest, eh_digrafo, peso, Inicial;
- 	int *visitados;
- 	float *visitados_pesos;
-	Grafo *gr = NULL;
+	int possibilidades = pow(pinos,discos);
+	int **estadoTorre = gerarPossibilidades(possibilidades);
 
-	while(1){
-		printf("-----MENU-----\n");
-		printf("[1]-Criar/Reiniciar Grafo\n");
-		printf("[2]-Inserir Aresta\n");
-		printf("[3]-Mostrar\n");
-		printf("[4]-Remover\n");
-		printf("[5]-Busca Profundidade\n");
-		printf("[6]-Busca Largura\n");
-		printf("[7]-Liberar\n");
-		printf("[0]-SAIR\n");
-		scanf("%d", &op);
-		switch(op){
-			case 1:
-				printf("Numero de vertices: ");
-				scanf("%d", &nro_vertices);
+ 	Grafo *grafo = cria_Grafo(possibilidades,pinos, 0);
+	
+	construirGrafo(grafo, estadoTorre, possibilidades);
 
-				printf("Numero grau máximo: ");
-				scanf("%d", &grau_max);
+	construirArestaNivel(grafo, possibilidades);
 
-				printf("Grafo Ponderado? (1-Sim |0-Não): ");
-				scanf("%d", &eh_ponderado);
+	/*	
+	for(int x=0;x< possibilidades ;x++){
+		printf("%d %d %d %d\n",estadoTorre[x][0],estadoTorre[x][1],estadoTorre[x][2],estadoTorre[x][3]);
+	}*/
 
-				if(gr!= NULL)
-					liberar_Grafo(gr);
-				gr = cria_Grafo(nro_vertices, grau_max, eh_ponderado);
-				printf("Grafo CRIADO com Sucesso.\n");
-				break;
-
-			case 2:
-				/*
-				printf("Vertice de Origem: ");
-				scanf("%d", &orig);
-
-				printf("Vertice de Destino: ");
-				scanf("%d", &dest);
-
-				printf("É Digrafo? (1-Sim |0-Não): ");
-				scanf("%d", &eh_digrafo);
-
-				printf("Peso da relação: ");
-				scanf("%d", &peso);
-				
-				insereAresta(gr, orig, dest, eh_digrafo, peso);
-				printf("Aresta INSERIDA com Sucesso.\n");
-				*/
-				
-				break;
-			case 3:
-
-				break;
-			case 4:
-				printf("Vertice de Origem: ");
-				scanf("%d", &orig);
-
-				printf("Vertice de Destino: ");
-				scanf("%d", &dest);
-
-				printf("É Digrafo? (1-Sim |0-Não): ");
-				scanf("%d", &eh_digrafo);
-
-				removeAresta(gr, orig, dest, eh_digrafo);
-				printf("Aresta REMOVIDA com Sucesso.\n");
-
-				break;
-			case 5:
-				/*
-				printf("Vertice Inicial: ");
-				
-				scanf("%d", &Inicial);
-				visitados = (int*) calloc(nro_vertices, sizeof(int));
-				visitados_pesos = (float*) calloc(nro_vertices, sizeof(float));
-
-				buscaProfundidade_Grafo(gr, Inicial, visitados, visitados_pesos);
-
-				printf("VISITADOS: ");
-				for(int i=0; i<nro_vertices; i++){
-					printf("[%d - %d {%f}]\n",i, visitados[i], visitados_pesos[i] );
-				}
-				printf("\n");
-
-				free(visitados);
-				visitados = NULL;
-
-				free(visitados_pesos);
-				visitados_pesos = NULL;
-				printf("Busca em PROFUNDIDADE realizada com Sucesso.\n");
-				*/
-				break;
-
-			case 6:
-				/*
-				printf("Vertice Inicial: ");
-				
-				scanf("%d", &Inicial);
-				visitados = (int*) calloc(nro_vertices, sizeof(int));
-				visitados_pesos = (float*) calloc(nro_vertices, sizeof(float));
-
-				buscaLargura_Grafo(gr, Inicial, visitados, visitados_pesos);
-
-				printf("VISITADOS: ");
-				for(int i=0; i<nro_vertices; i++){
-					printf("[%d - %d {%f}]\n",i, visitados[i], visitados_pesos[i] );
-				}
-				printf("\n");
-
-				free(visitados);
-				visitados = NULL;
-
-				free(visitados_pesos);
-				visitados_pesos = NULL;
-				printf("Busca em LARGURA realizada com Sucesso.\n");
-				*/
-				break;
-
-			case 7:
-				if(gr!= NULL)
-					liberar_Grafo(gr);
-				printf("Grafo LIBERADO com Sucesso.\n");
-
-				break;
-			case 0:
-				exit(0);
-				break;
+	for(int x=0; x< possibilidades; x++){
+		printf("%d | ", x+1);
+		for(int y=0; y < pinos; y++){
+			printf("%d ",grafo->arestas[x][y] );
 		}
+		printf("(%d %d %d %d)\n",estadoTorre[x][0],estadoTorre[x][1],estadoTorre[x][2],estadoTorre[x][3]);
 	}
+
 	return 0;
 }
