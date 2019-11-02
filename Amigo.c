@@ -205,7 +205,7 @@ void printEstado(int *atual){
                     (**gr).grau[origem-1]++;
 
                     if(!ehDigrafo){
-                        inserirAresta(gr, d5estino, origem, peso, 1);
+                        inserirAresta(gr, destino, origem, peso, 1);
                     }
                 }
             }
