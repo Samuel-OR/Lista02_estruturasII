@@ -50,14 +50,9 @@ PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt){
 }
 
 void mostrarPilha(PILHA *pilha){
-	if(pilha==NULL){
-		//printf("Pilha Vazia.\n");
-	}else{
-		printf("Caminho: [");
-		for(;pilha->prox != NULL; pilha = pilha->prox)
-			printf("%d - ",pilha->vertice );
-
-		printf("%d]\n",pilha->vertice );
+	if(pilha != NULL){
+		mostrarPilha(pilha->prox);
+		printf("%d ", pilha->vertice);
 	}
 }
 
@@ -206,7 +201,10 @@ void buscaProfundidade_Grafo(Grafo *gr, int ini, int *visitado, float *visitados
 
 	buscaProfundidade(gr, ini, visitado, cont, visitados_pesos, pilha, valorP, maior_p);
 
+
+	printf("\nCaminho: ");
 	mostrarPilha(maior_p->caminho);
+	printf("\nQuantidade de cidades: %d\n",maior_p->qtd_elementos-1);
 }
 
 void copiarPilha(PILHA **p1,PILHA **p2){
@@ -387,19 +385,7 @@ int main(){
 				visitados_pesos = (float*) calloc(nro_vertices, sizeof(float));
 
 				buscaProfundidade_Grafo(gr, Inicial, visitados, visitados_pesos, valorP, maior_p);
-				//mostrarPilha(maior_p->caminho);
-				/*printf("VISITADOS: ");
-				for(int i=0; i<nro_vertices; i++){
-					printf("[%d - %d {%f}]\n",i, visitados[i], visitados_pesos[i] );
-				}
-				printf("\n");*/
-
-				/*free(visitados);
-				visitados = NULL;
-
-				free(visitados_pesos);
-				visitados_pesos = NULL;*/
-				printf("Busca em PROFUNDIDADE realizada com Sucesso.\n");
+				
 				break;
 
 			case 6:
