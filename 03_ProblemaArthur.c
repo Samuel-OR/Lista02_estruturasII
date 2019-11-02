@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <sys/time.h>
 
-typedef struct
-{
+typedef struct{
 	int nro_vertices;
 	int **arestas;
 	int eh_ponderado;
@@ -15,8 +15,7 @@ typedef struct
 
 //-------------------------PILHA---------------------------
 typedef struct pi PILHA;
-struct pi
-{
+struct pi{
 	int vertice;
 	float arestaAnt;
 	PILHA *prox, *inicio, *fim;
@@ -24,14 +23,15 @@ struct pi
 
 //struct para guardar os caminhos possíveis
 typedef struct m_pilha maior_pilha;
-struct m_pilha
-{
+struct m_pilha{
 	int qtd_elementos;
 	PILHA *caminho;
 };
 
-PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt)
-{
+//calcular o tempo em microsegundos
+
+
+PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt){
 	PILHA *novo;
 	novo = (PILHA *)malloc(sizeof(PILHA));
 	;
@@ -63,8 +63,7 @@ void mostrarPilha(PILHA *pilha){
 	}
 }
 
-PILHA *removerPilha(PILHA *pilha)
-{
+PILHA *removerPilha(PILHA *pilha){
 	if (pilha == NULL)
 	{
 		//printf("Fila Vazia.\n");
@@ -369,22 +368,19 @@ void buscaLargura_Grafo(Grafo *gr, int ini, int *visitado, maior_pilha *maior_p,
 	free(fila);
 }*/
 
-int main()
-{
-
+int main(){
 	int op, eh_ponderado, grau_max, nro_vertices;
 	int orig, dest, eh_digrafo, peso, Inicial;
 	int *visitados;
-	float *visitados_pesos;
-	float valorP;
+	float *visitados_pesos, valorP;
+	float tempo_inicial, tempo_final, tempo_total;
 	Grafo *gr = NULL;
 
 	maior_pilha *maior_p = (maior_pilha *)malloc(sizeof(maior_pilha));
 	maior_p->qtd_elementos = 0;
 	maior_p->caminho = NULL;
 
-	while (1)
-	{
+	while (1){
 		printf("\n--------- MENU ---------\n");
 		printf(" [1]-Criar/Reiniciar Grafo\n");
 		printf(" [2]-Inserir Aresta\n");
@@ -510,7 +506,8 @@ int main()
 			visitados = (int *)calloc(nro_vertices, sizeof(int));
 			visitados_pesos = (float *)calloc(nro_vertices, sizeof(float));
 
-			buscaLargura_Grafo(gr, Inicial, visitados, maior_p, valorP);
+			buscaProfundidade_Grafo(gr, Inicial, visitados, visitados_pesos, valorP, maior_p);
+		
 			printf("\n- - Busca reallizada! - - \nCaminho: ");
 			mostrarPilha(maior_p->caminho);
 
