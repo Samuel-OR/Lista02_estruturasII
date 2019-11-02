@@ -48,8 +48,7 @@ PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt)
 	novo->fim = pilha->fim;
 
 	PILHA *aux = pilha;
-	do
-	{
+	do{
 		aux->inicio = novo;
 		aux = aux->prox;
 	} while (aux != NULL);
