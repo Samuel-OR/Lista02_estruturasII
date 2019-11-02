@@ -14,6 +14,75 @@ typedef struct{
 	int* grau;
 	int grau_max;
 }Grafo;
+typedef struct pi PILHA;
+struct pi{
+	int vertice;
+	float arestaAnt;
+	PILHA *prox, *inicio, *fim;
+};
+
+//struct para guardar os caminhos possíveis
+typedef struct m_pilha maior_pilha;
+struct m_pilha{
+	int qtd_elementos;
+	PILHA *caminho;
+};
+
+
+//FUNÇÕES PARA IDENTIFICAR CAMINHO
+PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt){
+	PILHA *novo;
+	novo = (PILHA*) malloc(sizeof(PILHA));;
+	novo->vertice = vertice;
+	novo->arestaAnt = arestaAnt;
+
+	if(pilha==NULL){
+		novo->inicio = novo;
+		novo->fim = novo;
+		return novo;
+	}
+	novo->prox = pilha;
+	novo->fim = pilha->fim;
+
+	PILHA *aux = pilha;
+	do{
+		aux->inicio = novo;
+		aux = aux->prox;
+	}while(aux!=NULL);
+	
+	return novo;
+}
+void mostrarPilha(PILHA *pilha){
+	if(pilha != NULL){
+		mostrarPilha(pilha->prox);
+		printf("%d ", pilha->vertice);
+	}
+}
+PILHA *removerPilha(PILHA *pilha){
+	if(pilha==NULL){
+		//printf("Fila Vazia.\n");
+		return pilha;
+	}
+
+	PILHA *aux;
+	for(aux = pilha; aux->prox != NULL; aux= aux->prox){
+		aux->inicio = pilha->prox;
+	}
+	aux->inicio = pilha->prox;
+	return pilha->prox;
+}
+void copiarPilha(PILHA **p1,PILHA **p2){
+	PILHA *aux = (PILHA *)malloc(sizeof(PILHA));
+	if(*p1 == NULL){
+        *p2 = NULL;
+    }else{
+        copiarPilha(&(*p1)->prox,p2);
+        aux->vertice = (*p1)->vertice;
+        aux->prox=*p2;
+        *p2 = aux;
+    }
+}
+
 
 Grafo* cria_Grafo(int nro_vertices, int grau_max, int eh_ponderado){
 	Grafo *gr;
@@ -57,7 +126,6 @@ int insereAresta(Grafo *gr, int orig, int dest, int eh_digrafo, float peso){
 	return resul;
 }
 
-/*
 int removeAresta(Grafo *gr, int orig, int dest, int eh_digrafo){
 	int resul = 0;
 
@@ -99,7 +167,6 @@ void liberar_Grafo(Grafo *gr){
 		free(gr);
 	}
 }
-*/
 
 int **gerarPossibilidades(int possibilidades){
 	int cont=0;
@@ -177,6 +244,63 @@ void construirGrafo(Grafo *grafo, int **estadoTorre, int possibilidades){
 }
 
 
+//BUSCAR
+void buscaProfundidade(Grafo *gr, int ini, int *visitado, int cont, PILHA *pilha, maior_pilha *maior_p,  maior_pilha *menor_p){
+
+	int i;
+	visitado[ini] = cont;
+	pilha = inserirPilha(pilha,ini, 0);
+
+	for(i=1; i<gr->grau[ini]; i++){
+		if(!visitado[gr->arestas[ini][i]]){
+			if(gr->arestas[ini][0] < gr->arestas[ini][i])
+			//visitados_pesos[gr->arestas[ini][i]] += gr->pesos[ini][i]+visitados_pesos[ini];
+			buscaProfundidade(gr, gr->arestas[ini][i], visitado, cont + 1, pilha, maior_p, menor_p);
+		}
+	}
+
+	if(cont>maior_p->qtd_elementos){
+		free(maior_p->caminho);
+		maior_p->caminho=NULL;
+		copiarPilha(&pilha,&maior_p->caminho);
+		maior_p->qtd_elementos=cont;
+	}
+
+	if(cont<=menor_p->qtd_elementos){
+		free(menor_p->caminho);
+		menor_p->caminho=NULL;
+		copiarPilha(&pilha,&menor_p->caminho);
+		menor_p->qtd_elementos=cont;
+	}
+
+	pilha = removerPilha(pilha);
+	visitado[ini] = 0;
+}
+
+
+//Função principal: Faz a interface com o usuário
+void buscaProfundidade_Grafo(Grafo *gr, int ini, int *visitado, maior_pilha *maior_p, maior_pilha *menor_p){
+
+	PILHA *pilha = (PILHA*)malloc(sizeof(PILHA));
+	pilha = NULL;
+	int i, cont = 1;
+	for(i=0; i<gr->nro_vertices; i++)
+		visitado[i] = 0;
+
+	buscaProfundidade(gr, ini, visitado, cont, pilha, maior_p, menor_p);
+
+
+	printf("\nMaior Caminho: ");
+	mostrarPilha(maior_p->caminho);
+	printf("\nQuantidade de cidades: %d\n",maior_p->qtd_elementos-1);
+
+
+	printf("\nMenor Caminho: ");
+	mostrarPilha(menor_p->caminho);
+	printf("\nQuantidade de cidades: %d\n",menor_p->qtd_elementos-1);
+}
+
+
 int main(){
  	
 	int possibilidades = pow(pinos,discos);
@@ -184,22 +308,35 @@ int main(){
 
  	Grafo *grafo = cria_Grafo(possibilidades,pinos, 0);
 	
+	maior_pilha *maior_p = (maior_pilha*)malloc(sizeof(maior_pilha));
+	maior_p->qtd_elementos = 0;
+	maior_p->caminho = NULL;
+
+	maior_pilha *menor_p = (maior_pilha*)malloc(sizeof(maior_pilha));
+	menor_p->qtd_elementos = possibilidades;
+	menor_p->caminho = NULL;
+
+	int *visitados = (int*) calloc(possibilidades, sizeof(int));
 	construirGrafo(grafo, estadoTorre, possibilidades);
 
-	construirArestaNivel(grafo, possibilidades);
+	//buscarGrafo(grafo, possibilidades, maior, menor);
+	int ini = 0;
+	buscaProfundidade_Grafo(grafo, ini, visitados, maior_p, menor_p);
 
 	/*	
 	for(int x=0;x< possibilidades ;x++){
 		printf("%d %d %d %d\n",estadoTorre[x][0],estadoTorre[x][1],estadoTorre[x][2],estadoTorre[x][3]);
 	}*/
 
+	
+	/*
 	for(int x=0; x< possibilidades; x++){
 		printf("%d | ", x+1);
 		for(int y=0; y < pinos; y++){
 			printf("%d ",grafo->arestas[x][y] );
 		}
 		printf("(%d %d %d %d)\n",estadoTorre[x][0],estadoTorre[x][1],estadoTorre[x][2],estadoTorre[x][3]);
-	}
+	}*/
 
 	return 0;
 }

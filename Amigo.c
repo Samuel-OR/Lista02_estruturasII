@@ -76,11 +76,11 @@ int main(){
     montaHanoi(&grafo, estados, possibilidades);
 
     rotaFinal = buscaLargura(&grafo, 1, possibilidades, visitados, rotaFinal, 0);
-    /*
+    
     printf("Maior rota: ");
     for(int i = 1; i < possibilidades && rotaFinal[0][i] != 0; i++) printf("%d ", rotaFinal[0][i]);
     printf("\n");
-    printf("Menor rota: ");
+    /*printf("Menor rota: ");
     for(int i = 1; i < possibilidades && rotaFinal[1][i] != 0; i++) printf("%d ", rotaFinal[1][i]);
     printf("\n");
     for(int i = 0; i < possibilidades; i++) printf("%d ", grafo->dist[i]);
@@ -93,11 +93,11 @@ int main(){
         }
         printf("\n");
     }
-
+    /*
     for(int i = 0; i < possibilidades; i++) {
         printEstado(estados[i]);
         printf(" %d\n", (i+1));
-    }
+    }*/
     return 0;
 }
 
