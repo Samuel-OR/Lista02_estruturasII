@@ -29,7 +29,11 @@ struct m_pilha{
 };
 
 //calcular o tempo em microsegundos
-
+long getMicrotime(){
+	struct timeval currentTime;
+	gettimeofday(&currentTime, NULL);
+	return currentTime.tv_sec * (int)1e6 + currentTime.tv_usec;
+}
 
 PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt){
 	PILHA *novo;
@@ -373,12 +377,11 @@ int main(){
 	int orig, dest, eh_digrafo, peso, Inicial;
 	int *visitados;
 	float *visitados_pesos, valorP;
-	float tempo_inicial, tempo_final, tempo_total;
-	Grafo *gr = NULL;
+	struct timeval tempo_inicial, tempo_final;
+	float tempo_total;
 
+	Grafo *gr = NULL;
 	maior_pilha *maior_p = (maior_pilha *)malloc(sizeof(maior_pilha));
-	maior_p->qtd_elementos = 0;
-	maior_p->caminho = NULL;
 
 	while (1){
 		printf("\n--------- MENU ---------\n");
@@ -505,11 +508,20 @@ int main(){
 
 			visitados = (int *)calloc(nro_vertices, sizeof(int));
 			visitados_pesos = (float *)calloc(nro_vertices, sizeof(float));
+			maior_pilha *maior_p = (maior_pilha *)malloc(sizeof(maior_pilha));
+			maior_p->qtd_elementos = 0;
+			maior_p->caminho = NULL;
 
+			gettimeofday(&tempo_inicial, NULL);
 			buscaProfundidade_Grafo(gr, Inicial, visitados, visitados_pesos, valorP, maior_p);
-		
-			printf("\n- - Busca reallizada! - - \nCaminho: ");
+			gettimeofday(&tempo_final, NULL);
+
+			tempo_total = (tempo_final.tv_sec - tempo_inicial.tv_sec) * (int)1e6 + (tempo_final.tv_usec - tempo_inicial.tv_usec);
+			printf("\nTEMPO TOTAL: %.3f microsegundos\n", tempo_total);
+
+			printf("- - Busca em PROFUNDIDADE realizada! - - \nCaminho: ");
 			mostrarPilha(maior_p->caminho);
+
 
 			break;
 		case 6:
@@ -520,10 +532,20 @@ int main(){
 
 			visitados = (int *)calloc(nro_vertices, sizeof(int));
 			visitados_pesos = (float *)calloc(nro_vertices, sizeof(float));
+			
+			maior_p->qtd_elementos = 0;
+			maior_p->caminho = NULL;
 
+			gettimeofday(&tempo_inicial, NULL);
 			buscaLargura_Grafo(gr, Inicial, visitados, maior_p, valorP);
-			printf("\n- - Busca reallizada - - \nCaminho: ");
+			gettimeofday(&tempo_final, NULL);
+
+			tempo_total = (tempo_final.tv_sec - tempo_inicial.tv_sec) * (int)1e6 + (tempo_final.tv_usec - tempo_inicial.tv_usec);
+			printf("\nTEMPO TOTAL: %.3f microsegundo\n", tempo_total);
+
+			printf("- - Busca em LARGURA realizada - - \nCaminho: ");
 			mostrarPilha(maior_p->caminho);
+		
 
 			break;
 		case 7:
