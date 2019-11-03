@@ -75,7 +75,7 @@ int main(){
 
     montaHanoi(&grafo, estados, possibilidades);
 
-    rotaFinal = buscaLargura(&grafo, 1, possibilidades, visitados, rotaFinal, 0);
+    rotaFinal = buscaLargura(&grafo, 0, possibilidades, visitados, rotaFinal, 0);
     
     printf("Maior rota: ");
     for(int i = 1; i < possibilidades && rotaFinal[0][i] != 0; i++) printf("%d ", rotaFinal[0][i]);

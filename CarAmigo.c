@@ -91,15 +91,22 @@ int main(){
     }
     contPos = 0;
     conectar(hanoi);
+
     buscaEmLargura(hanoi->gr,0);
+
     //mostraEstados(hanoi);
-    printf("Digite o estado inicial da torre[numeros separados por espaco]:\n");
-    scanf("%d%d%d%d", &estado[0], &estado[1], &estado[2], &estado[3]);
-    buscaProf(hanoi->gr, converteEstado(hanoi, estado), vis, cam);
+    //printf("Digite o estado inicial da torre[numeros separados por espaco]:\n");
+    //scanf("%d%d%d%d", &estado[0], &estado[1], &estado[2], &estado[3]);
+    //buscaProf(hanoi->gr, converteEstado(hanoi, estado), vis, cam);
+    
+    buscaProf(hanoi->gr,0, vis, cam);
+    
+    
     printf("O maior caminho possivel eh:\n");
     mostraCam(cam->caminho1, hanoi);
     printf("O menor caminho possivel eh:\n");
     mostraCam(cam->caminho2, hanoi);
+
     return 0;
 }
 
@@ -117,7 +124,7 @@ void mostraCam(Pilha *caminho, Torre *hanoi){
     if(caminho==NULL){
     }else{
         mostraCam(caminho->prox, hanoi);
-        printf("%d: %d,%d,%d,%d\n",caminho->n, hanoi->estado[caminho->n][0], hanoi->estado[caminho->n][1], hanoi->estado[caminho->n][2], hanoi->estado[caminho->n][3]);
+        printf("%d: %d,%d,%d,%d\n",caminho->n+1, hanoi->estado[caminho->n][0], hanoi->estado[caminho->n][1], hanoi->estado[caminho->n][2], hanoi->estado[caminho->n][3]);
     }
 }
 
@@ -223,6 +230,7 @@ void buscaEmProfundidade(Grafos *gr, int raiz, int *visitado, Pilha **caminho, i
             buscaEmProfundidade(gr, gr->arestas[raiz][i], visitado, caminho, cont+1, cam);
         }
     }
+    printf("ini: %d\n",raiz);
     if(raiz == 80){
         if(cont>cam->tam1){
             LiberaP(&cam->caminho1);
@@ -241,15 +249,15 @@ void buscaEmProfundidade(Grafos *gr, int raiz, int *visitado, Pilha **caminho, i
     visitado[raiz]=0;
 }
 
-
 void buscaProf(Grafos *gr, int raiz, int *visitado, Maior *cam){
-    int i, cont = 1;
+    int i;
     for(i=0; i<gr->nVertices; i++){
         visitado[i] = 0;
     }
+    
     Pilha *Caminho=(Pilha*)malloc(sizeof(Pilha));
     Caminho=NULL;
-    cont=0;
+    int cont=0;
     buscaEmProfundidade(gr, raiz, visitado, &Caminho, cont, cam);
 }
 
@@ -295,14 +303,12 @@ void LiberaP(Pilha **p){
 
 void buscaEmLargura(Grafos *gr, int raiz){
     Fila *F=NULL,*F2=NULL;
-    int i,cont = 0, j = 0;
     int vertice1,altura=0;
     int *pointer;
     int *marcados;
     int elemento;
     marcados = (int*)calloc(gr->nVertices, sizeof(int));
     marcados[raiz] = 1;
-    cont++;
     F = ColocaVerticeNaFila(F, raiz);
     do{
         LiberaF(&F2);
@@ -325,11 +331,10 @@ void buscaEmLargura(Grafos *gr, int raiz){
             //exibeFila(F);                
         }
         //exibeFila(F2);
-        printf("%d\n",altura);
+        printf("Altura: %d\n", altura);
         copiaFila(&F2,&F);
         altura++;
-    }while (F2!=NULL);
-    
+    }while (F2!=NULL);   
 }
 
 void exibeFila(Fila *F){
@@ -338,7 +343,6 @@ void exibeFila(Fila *F){
         printf("%d ", aux->vertice);
     puts("\n");
 }
-
 void copiaFila(Fila **p1,Fila **p2){
     Fila *aux=(Fila*)malloc(sizeof(Fila));
     if(*p1 == NULL){
