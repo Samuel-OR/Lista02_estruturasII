@@ -29,7 +29,11 @@ struct m_pilha{
 };
 
 //calcular o tempo em microsegundos
-
+long getMicrotime(){
+	struct timeval currentTime;
+	gettimeofday(&currentTime, NULL);
+	return currentTime.tv_sec * (int)1e6 + currentTime.tv_usec;
+}
 
 PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt){
 	PILHA *novo;
@@ -57,7 +61,7 @@ PILHA *inserirPilha(PILHA *pilha, int vertice, float arestaAnt){
 }
 
 void mostrarPilha(PILHA *pilha){
-	if (pilha != NULL){
+	if (pilha->prox != NULL){
 		mostrarPilha(pilha->prox);
 		printf("%d ", pilha->vertice);
 	}
@@ -333,52 +337,17 @@ void buscaLargura_Grafo(Grafo *gr, int ini, int *visitado, maior_pilha *maior_p,
 	buscaLargura(gr, ini, visitado, cont, pilha, valorP, maior_p);
 }
 
-/*void buscaLargura_Grafo(Grafo *gr, int ini, int *visitado, int cont,float *visitados_pesos, PILHA *pilha, float valorP){
-	int i, vert, NV, cont = 1, *fila, IF = 0, FF = 0;
-
-	for (i = 0; i < gr->nro_vertices; i++)
-	{
-		visitado[i] = 0;
-		visitados_pesos[i] = 0;
-	}
-	NV = gr->nro_vertices;
-	fila = (int *)malloc(NV * sizeof(int));
-	FF++;
-	fila[FF] = ini;
-	visitado[ini] = cont;
-
-	while (IF != FF){
-		IF = (IF + 1) % NV;
-		vert = fila[IF];
-		cont++;
-		//pilha = inserirPilha(pilha, ini, 0);
-		for (i = 0; i < gr->grau[vert]; i++){
-			if (!visitado[gr->arestas[vert][i]] && (valorP - gr->pesos[vert][i]) >= 0){
-
-				FF = (FF + 1) % NV;
-				fila[FF] = gr->arestas[vert][i];
-				visitado[gr->arestas[vert][i]] = cont;
-				visitados_pesos[gr->arestas[vert][i]] += gr->pesos[vert][i] + visitados_pesos[vert];
-
-				//valorP -= gr->pesos[vert][i];
-			}
-		}
-	}
-
-	free(fila);
-}*/
 
 int main(){
 	int op, eh_ponderado, grau_max, nro_vertices;
 	int orig, dest, eh_digrafo, peso, Inicial;
 	int *visitados;
 	float *visitados_pesos, valorP;
-	float tempo_inicial, tempo_final, tempo_total;
-	Grafo *gr = NULL;
+	struct timeval tempo_inicial, tempo_final;
+	float tempo_total;
 
+	Grafo *gr = NULL;
 	maior_pilha *maior_p = (maior_pilha *)malloc(sizeof(maior_pilha));
-	maior_p->qtd_elementos = 0;
-	maior_p->caminho = NULL;
 
 	while (1){
 		printf("\n--------- MENU ---------\n");
@@ -505,11 +474,21 @@ int main(){
 
 			visitados = (int *)calloc(nro_vertices, sizeof(int));
 			visitados_pesos = (float *)calloc(nro_vertices, sizeof(float));
+			maior_pilha *maior_p = (maior_pilha *)malloc(sizeof(maior_pilha));
+			maior_p->qtd_elementos = 0;
+			maior_p->caminho = NULL;
 
+			gettimeofday(&tempo_inicial, NULL);
 			buscaProfundidade_Grafo(gr, Inicial, visitados, visitados_pesos, valorP, maior_p);
+			gettimeofday(&tempo_final, NULL);
+
+			tempo_total = (tempo_final.tv_sec - tempo_inicial.tv_sec) * (int)1e6 + (tempo_final.tv_usec - tempo_inicial.tv_usec);
+			printf("\nTEMPO TOTAL: %.3f microsegundos\n", tempo_total);
 		
-			printf("\n- - Busca reallizada! - - \nCaminho: ");
+			printf("\nCaminho: [ ");	
 			mostrarPilha(maior_p->caminho);
+			printf("]\nQuantidade de cidades: %d\n",maior_p->qtd_elementos-1);
+
 
 			break;
 		case 6:
@@ -520,16 +499,26 @@ int main(){
 
 			visitados = (int *)calloc(nro_vertices, sizeof(int));
 			visitados_pesos = (float *)calloc(nro_vertices, sizeof(float));
+			
+			maior_p->qtd_elementos = 0;
+			maior_p->caminho = NULL;
 
+			gettimeofday(&tempo_inicial, NULL);
 			buscaLargura_Grafo(gr, Inicial, visitados, maior_p, valorP);
-			printf("\n- - Busca reallizada - - \nCaminho: ");
+			gettimeofday(&tempo_final, NULL);
+
+			tempo_total = (tempo_final.tv_sec - tempo_inicial.tv_sec) * (int)1e6 + (tempo_final.tv_usec - tempo_inicial.tv_usec);
+			printf("\nTEMPO TOTAL: %.3f microsegundos\n", tempo_total);
+
+			printf("\nCaminho: [ ");
 			mostrarPilha(maior_p->caminho);
+			printf("]\nQuantidade de cidades: %d\n", maior_p->qtd_elementos-1);
 
 			break;
 		case 7:
 			if (gr != NULL)
 				liberar_Grafo(gr);
-			printf("Grafo LIBERADO com Sucesso.\n");
+			printf("\n- - Grafo LIBERADO - -\n");
 
 			break;
 		case 0:
