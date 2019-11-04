@@ -288,7 +288,7 @@ void copiaFila(Fila **p1,Fila **p2){
         *p2 = aux;
     }
 }
-void nivelProfundidade(Grafo *gr, int ini){
+void nivelLargura(Grafo *gr, int ini){
 	int *pontVertice, *visitados;
 	int altura=0, vertice, contido;
 	Fila *visitar = NULL, *aux = NULL;
@@ -343,7 +343,7 @@ int main(){
 	
 	construirGrafo(grafo, estadoTorre, possibilidades);
 	
-	nivelProfundidade(grafo,0);
+	nivelLargura(grafo,0);
 
 	int vet[4];
 	printf("Digite  posição de inicio (Ex: [1 1 1 1]): ");

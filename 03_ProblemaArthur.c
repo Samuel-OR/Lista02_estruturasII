@@ -380,7 +380,8 @@ int main(){
 			break;
 
 		case 2:
-			/*
+				//INSERINDO INDIVIDUALMENTE
+				/*
 				printf("Vertice de Origem: ");
 				scanf("%d", &orig);
 
@@ -396,39 +397,9 @@ int main(){
 				insereAresta(gr, orig, dest, eh_digrafo, peso);
 				printf("Aresta INSERIDA com Sucesso.\n");
 				*/
-
-			/*
-				TESTE SLIDE
-				
-				insereAresta(gr, 0, 1, 0, 1);
-				insereAresta(gr, 1, 3, 0, 1);
-				insereAresta(gr, 1, 2, 0, 1);
-				insereAresta(gr, 2, 4, 0, 1);
-				insereAresta(gr, 3, 0, 0, 1);
-				insereAresta(gr, 3, 4, 0, 1);
-				insereAresta(gr, 4, 1, 0, 1);
-				*/
-
-			/*
-				insereAresta(gr, 0, 2, 1, 1);
-				insereAresta(gr, 0, 4, 1, 1);
-				insereAresta(gr, 1, 3, 1, 1);
-				insereAresta(gr, 2, 7, 1, 1);
-				insereAresta(gr, 3, 6, 1, 1);
-				insereAresta(gr, 4, 5, 1, 1);
-				insereAresta(gr, 4, 7, 1, 1);
-				insereAresta(gr, 5, 1, 1, 1);
-				insereAresta(gr, 5, 4, 1, 1);
-				insereAresta(gr, 5, 7, 1, 1);
-				insereAresta(gr, 6, 0, 1, 1);
-				insereAresta(gr, 6, 2, 1, 1);
-				insereAresta(gr, 6, 4, 1, 1);
-				insereAresta(gr, 7, 3, 1, 1);
-				insereAresta(gr, 7, 5, 1, 1);
-				*/
-			/*
+			
 			//TESTE ĹÉLIS
-			insereAresta(gr, 2, 13, 0, 3.88);
+			/*insereAresta(gr, 2, 13, 0, 3.88);
 			insereAresta(gr, 11, 19, 0, 1.94);
 			insereAresta(gr, 8, 1, 0, 30.76);
 			insereAresta(gr, 10, 3, 0, 32.96);
@@ -445,12 +416,14 @@ int main(){
 			insereAresta(gr, 18, 1, 0, 8.40);
 			insereAresta(gr, 6, 13, 0, 6.39);
 			insereAresta(gr, 11, 10, 0, 10.36);
-			*/
+			//FIM LÉLIS*/
+
+			//OUTRO TESTE
+			insereAresta(gr, 1, 8, 0, 2);
 			insereAresta(gr, 1, 2, 0, 4);
 			insereAresta(gr, 1, 3, 0, 5);
 			insereAresta(gr, 1, 4, 0, 2);
 			insereAresta(gr, 1, 5, 0, 3);
-			insereAresta(gr, 1, 8, 0, 2);
 
 			insereAresta(gr, 2, 9, 0, 3);
 			insereAresta(gr, 2, 12, 0, 10);
@@ -465,8 +438,8 @@ int main(){
 			insereAresta(gr, 10, 12, 0, 1);
 			insereAresta(gr, 11, 17, 0, 1);
 			insereAresta(gr, 17, 16, 0, 3);
-			insereAresta(gr, 12, 14, 0, 1);
 			insereAresta(gr, 12, 13, 0, 3);
+			insereAresta(gr, 12, 14, 0, 1);
 			insereAresta(gr, 13, 15, 0, 3);
 			insereAresta(gr, 15, 16, 0, 4);
 			
