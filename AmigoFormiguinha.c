@@ -40,12 +40,11 @@ int main(){
 
     geraEstados(estados);
 
-    /* mostrar todos os estados
+     //mostrar todos os estados
     for(int i = 0; i < possibilidades; i++) {
         printf("%d ", i+1);
         printEstado(estados[i]);
     }
-    */
 
     montaTubo(&grafo, estados, possibilidades);
 
