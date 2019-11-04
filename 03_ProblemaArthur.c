@@ -222,8 +222,7 @@ void buscaProfundidade(Grafo *gr, int ini, int *visitado, int cont, float *visit
 		}
 	}
 
-	if (cont > maior_p->qtd_elementos)
-	{
+	if (cont > maior_p->qtd_elementos){
 		free(maior_p->caminho);
 		maior_p->caminho = NULL;
 		copiarPilha(&pilha, &maior_p->caminho);
@@ -427,7 +426,7 @@ int main(){
 				insereAresta(gr, 7, 3, 1, 1);
 				insereAresta(gr, 7, 5, 1, 1);
 				*/
-
+			/*
 			//TESTE ĹÉLIS
 			insereAresta(gr, 2, 13, 0, 3.88);
 			insereAresta(gr, 11, 19, 0, 1.94);
@@ -446,7 +445,31 @@ int main(){
 			insereAresta(gr, 18, 1, 0, 8.40);
 			insereAresta(gr, 6, 13, 0, 6.39);
 			insereAresta(gr, 11, 10, 0, 10.36);
+			*/
+			insereAresta(gr, 1, 2, 0, 4);
+			insereAresta(gr, 1, 3, 0, 5);
+			insereAresta(gr, 1, 4, 0, 2);
+			insereAresta(gr, 1, 5, 0, 3);
+			insereAresta(gr, 1, 8, 0, 2);
 
+			insereAresta(gr, 2, 9, 0, 3);
+			insereAresta(gr, 2, 12, 0, 10);
+			insereAresta(gr, 9, 8, 0, 4);
+			insereAresta(gr, 8, 7, 0, 1);
+			insereAresta(gr, 7, 5, 0, 1);
+			insereAresta(gr, 5, 6, 0, 1);
+			insereAresta(gr, 6, 4, 0, 1);
+
+			insereAresta(gr, 3, 10, 0, 4);
+			insereAresta(gr, 10, 11, 0, 2);
+			insereAresta(gr, 10, 12, 0, 1);
+			insereAresta(gr, 11, 17, 0, 1);
+			insereAresta(gr, 17, 16, 0, 3);
+			insereAresta(gr, 12, 14, 0, 1);
+			insereAresta(gr, 12, 13, 0, 3);
+			insereAresta(gr, 13, 15, 0, 3);
+			insereAresta(gr, 15, 16, 0, 4);
+			
 			printf("\n- - Arestas INSERIDAS --\n");
 			break;
 		case 3:
@@ -485,7 +508,7 @@ int main(){
 			tempo_total = (tempo_final.tv_sec - tempo_inicial.tv_sec) * (int)1e6 + (tempo_final.tv_usec - tempo_inicial.tv_usec);
 			printf("\nTEMPO TOTAL: %.3f microsegundos\n", tempo_total);
 		
-			printf("\nCaminho: [ ");	
+			printf("\nCaminho Prof: [ ");	
 			mostrarPilha(maior_p->caminho);
 			printf("]\nQuantidade de cidades: %d\n",maior_p->qtd_elementos-1);
 
@@ -510,9 +533,9 @@ int main(){
 			tempo_total = (tempo_final.tv_sec - tempo_inicial.tv_sec) * (int)1e6 + (tempo_final.tv_usec - tempo_inicial.tv_usec);
 			printf("\nTEMPO TOTAL: %.3f microsegundos\n", tempo_total);
 
-			printf("\nCaminho: [ ");
+			printf("\nCaminho Larg: [ ");
 			mostrarPilha(maior_p->caminho);
-			printf("]\nQuantidade de cidades: %d\n", maior_p->qtd_elementos-1);
+			printf("]\nQuantidade de cidades: %d\n", maior_p->qtd_elementos);
 
 			break;
 		case 7:
