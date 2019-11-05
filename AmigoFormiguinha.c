@@ -1,310 +1,312 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include<stdio.h>
+#include<stdlib.h>
 
-typedef struct {
-    int nVertices, ehPonderado;
-    int *pesos, *arestas;
-} Grafo;
+struct grafos{
+    int nVertices, ehPonderado, *grau;
+    int **arestas, **pesos;
+};
 
-Grafo * criaGrafo(int vertices, int ehPonderado);
-void inserirAresta(Grafo **gr, int origem, int destino, int peso, int ehDigrafo);
-void geraEstados(int **estados);
-int ** montaRota(Grafo **gr, int origem, int destino, int *visitados, int **rotaFinal, int passos);
+typedef struct grafos Grafos;
 
-//Funções para montar grafo
-void montaTubo(Grafo **gr, int **estados, int tam);
-int * proxEstado(int *estado);
-int temColisao(int *estado);    
+typedef struct{
+    int **mat;
+    Grafos *gr;
+}Estados;
+
+struct pilha{
+    int n;
+    struct pilha *prox;
+};
+typedef struct pilha Pilha;
+
+Grafos* criaGrafo(int vertice, int ehPonderado);
+void insereAresta(Grafos **gr, int origem, int destino, int peso, int ehDigrafo);
+Estados *inicializaEst();
+int tamaEst(int *estado);
+int temColisao(int *estado);
 int temSaida(int *estado);
-int * resolveSaida(int *estado);
-int * resolveColisao(int *estado);
-void copyList(int **copia, int *original, int tam);
-int ehIgual(int *estado1, int *estado2);
-
-//Auxiliares
-int tamEstado(int *tamEstado);
-int contem(int *lista, int tam, int num);
-int length(int *lista, int tam);
+int** troca(int **mat);
+int *tira(int *estado);
 void printEstado(int *estado);
+int *tiraC(int *estado);
+int *proximoEstado(int *estAtual);
+int igual(int *est,int *est2);
+int procuraEst(int **estados,int *estado);
+void adj(Estados *est);
+void push(int v, Pilha **p);
+int MontaCam(Grafos *gr,int atual,Pilha **caminho,int *cont);
+void exibePilha(Pilha *P,Estados *est);
+void LigarEstados(Estados *est,int numeroEstados);
 
 int main(){
+    Estados *est=inicializaEst();
 
-    int possibilidades = 31;
-
-    Grafo *grafo = criaGrafo(possibilidades, 0);
-
-    int **estados = malloc(sizeof(int *)*possibilidades);
-    int *visitados = calloc(possibilidades, sizeof(int));
-    int **rotaFinal = malloc(sizeof(int*));
-    rotaFinal[0] = calloc(possibilidades, sizeof(int));
-
-    geraEstados(estados);
-
-     //mostrar todos os estados
-    for(int i = 0; i < possibilidades; i++) {
-        printf("%d ", i+1);
-        printEstado(estados[i]);
+    Pilha *p=NULL;
+    int *test=(int*)calloc(4,sizeof(int));
+    printf("digite a configuração das formigas separadas por espaço: ");
+    for(int i=0;i<4;i++){
+        scanf("%i",&test[i]);
     }
-
-    montaTubo(&grafo, estados, possibilidades);
-
-    /* mostrar as adjacencias
-    for(int i = 0; i < possibilidades; i++) printf("%d ", grafo->arestas[i]);
-    printf("\n");
-    */
-
-    rotaFinal = montaRota(&grafo, 21, 31, visitados, rotaFinal, 0);
+    // test=proximoEstado(test);
+    // printEstado(test);
+    // printf("%d\n",procuraEst(est->mat,test));
     
-    printf("Menor rota: ");
-    for(int i = 1; i < possibilidades && rotaFinal[0][i] != 0; i++) printf("%d ", rotaFinal[0][i]);
-    printf("\n");
     
-    return 0;
+    LigarEstados(est,30);
+    //adj(est);
+    
+    int cont=0;
+    MontaCam(est->gr,procuraEst(est->mat,test),&p,&cont);
+    printf("As formigas vão passar por %d rodada(s) até saírem\nSendo elas:\n",cont);
+    exibePilha(p,est);
 
 }
 
-Grafo * criaGrafo(int vertices, int ehPonderado){
-    Grafo *gr;
-    gr = (Grafo *) malloc(sizeof(Grafo));
-
-    if(gr != NULL){
-        gr->nVertices = vertices;
-        gr->ehPonderado = (ehPonderado != 0)? 1:0;
-
-        gr->arestas = (int*) malloc(vertices*sizeof(int));
-
-        if(gr->ehPonderado){
-            gr->pesos = (int*) malloc(vertices * sizeof(int));
+int** troca(int **mat){
+    int i;
+    for(i=0;i<16;i++){
+        for(int j=0;j<4;j++){
+            if(mat[i][j]==0) mat[i][j]=-1;
         }
-
     }
+    for(i=i;i<24;i++){
+        for(int j=0;j<3;j++){
+            if(mat[i][j]==0) mat[i][j]=-1;
+        }    
+    }
+    for(i=i;i<28;i++){
+        for(int j=0;j<2;j++){
+            if(mat[i][j]==0) mat[i][j]=-1;
+        }
+    }
+    return mat;
+}
 
+Grafos* criaGrafo(int vertice, int ehPonderado){
+    Grafos *gr;
+    int i;
+    gr = (Grafos*)malloc(sizeof(Grafos));
+    if(gr != NULL){
+        gr->nVertices = vertice;
+        gr->ehPonderado = (ehPonderado != 0)? 1:0;
+        gr->grau = (int*) calloc(sizeof(int), vertice);
+        gr->arestas = (int**) malloc(vertice * sizeof(int*));
+        for(i=0; i<vertice; i++){
+            gr->arestas[i] = (int*) calloc(vertice, sizeof(int));
+        }
+        if(gr->ehPonderado){
+            gr->pesos = (int**) malloc(vertice * sizeof(int*));
+            for(i=0; i<vertice; i++){
+                gr->pesos[i] = (int*) calloc(vertice, sizeof(int));
+            }   
+        }
+    }
     return gr;
 }
 
-void inserirAresta(Grafo **gr, int origem, int destino, int peso, int ehDigrafo){
-    if(gr != NULL){ 
-        if(origem > 0 && origem <= (**gr).nVertices){
-            if(destino > 0 && destino <= (**gr).nVertices){
-                (**gr).arestas[origem-1] = destino;
-
-                if((**gr).ehPonderado)
-                    (**gr).pesos[origem-1] = peso;
-
-                if(!ehDigrafo){
-                    inserirAresta(gr, destino, origem, peso, 1);
-                }
+void insereAresta(Grafos **gr, int origem, int destino, int peso, int ehDigrafo){
+    if(*gr != NULL){
+        if(origem >= 0 && origem <= (*gr)->nVertices){
+            if(destino > 0 && destino <= (*gr)->nVertices){
+                (*gr)->arestas[origem][(*gr)->grau[origem]] = destino;
+            }
+            if((*gr)->ehPonderado){
+                (*gr)->pesos[origem][(*gr)->grau[origem]] = peso;
+            }
+            (*gr)->grau[origem]++;
+            if(!ehDigrafo){
+                insereAresta(gr, destino, origem, peso, 1);
             }
         }
     }
 }
 
-void geraEstados(int **estados){
-    int cont = 0;
-
-    for(int i = -1; i < 2; i+=2){
-        for(int j = -1; j < 2; j+=2){
-            for(int k = -1; k < 2; k+=2){
-                for(int l = -1; l < 2; l+=2){
-                    estados[cont] = calloc(4, sizeof(int));
-                    estados[cont][0] = i;
-                    estados[cont][1] = j;
-                    estados[cont][2] = k;
-                    estados[cont][3] = l;
-                    //printf("%d (%d,%d,%d,%d)\n", cont+1, estados[cont][0], estados[cont][1], estados[cont][2], estados[cont][3]);
-                    cont++;
-                }
-            }
-        }
-    }
-    
-    for(int i = -1; i < 2; i+=2){
-        for(int j = -1; j < 2; j+=2){
-            for(int k = -1; k < 2; k+=2){
-                estados[cont] = calloc(3, sizeof(int));
-                estados[cont][0] = i;
-                estados[cont][1] = j;
-                estados[cont][2] = k;
-                //printf("%d (%d,%d,%d)\n", cont+1, estados[cont][0], estados[cont][1], estados[cont][2]);
-                cont++;
-            }
-        }
-    }
-
-    for(int i = -1; i < 2; i+=2){
-        for(int j = -1; j < 2; j+=2){
-            estados[cont] = calloc(2, sizeof(int));
-            estados[cont][0] = i;
-            estados[cont][1] = j;
-            //printf("%d (%d,%d)\n", cont+1, estados[cont][0], estados[cont][1]);
-            cont++;
-        }
-    }
-    for(int i = -1; i < 2; i+=2) {
-        estados[cont] = calloc(1, sizeof(int));
-        estados[cont][0] = i;
-        //printf("%d (%d)\n", cont+1, estados[cont][0]);
+Estados *inicializaEst(){
+    Estados *est=(Estados*)malloc(sizeof(Estados));
+    est->gr=criaGrafo(31,0);
+    est->mat=(int**)malloc(sizeof(int*)*31);
+    int cont=0;
+    int aa=1,bb=1,cc=1,dd=1;
+    for (int i = 0; i < 16; ++i) {
+        est->mat[cont]=(int*)calloc(4,sizeof(int));
+        if (!(i % 8)) aa = !aa;
+        if (!(i % 4)) bb = !bb;
+        if (!(i % 2)) cc = !cc; 
+        dd = !dd;
+        est->mat[cont][0]=aa;
+        est->mat[cont][1]=bb;
+        est->mat[cont][2]=cc;
+        est->mat[cont][3]=dd;
         cont++;
     }
-
-    estados[cont] = calloc(1, sizeof(int));
-    estados[cont][0] = 0;
-    //printf("%d (%d)\n", cont+1, estados[cont][0]);
+    bb=1,cc=1,dd=1;
+    for (int i = 0; i < 8; ++i) {
+        est->mat[cont]=(int*)calloc(3,sizeof(int));
+        if (!(i % 4)) bb = !bb;
+        if (!(i % 2)) cc = !cc; 
+        dd = !dd;
+        est->mat[cont][0]=bb;
+        est->mat[cont][1]=cc;
+        est->mat[cont][2]=dd;
+        cont++;
+    }
+    cc=1,dd=1;
+    for (int i = 0; i < 4; ++i) {
+        est->mat[cont]=(int*)calloc(2,sizeof(int));
+        if (!(i % 2)) cc = !cc; 
+        dd = !dd;
+        est->mat[cont][0]=cc;
+        est->mat[cont][1]=dd;
+        cont++;
+    }
+    est->mat[cont]=(int*)calloc(1,sizeof(int));
+    est->mat[cont][0]=-1;
     cont++;
+    est->mat[cont]=(int*)calloc(1,sizeof(int));
+    est->mat[cont][0]=1;
+    cont++;
+    est->mat[cont]=(int*)calloc(1,sizeof(int));
+    est->mat[cont][0]=0;
+    est->mat=troca(est->mat);
+    return est;
 }
 
-int ** montaRota(Grafo **gr, int origem, int destino, int *visitados, int **rotaFinal, int passos){
-    if(gr != NULL) {
-        int tamanho = 31;
-        visitados[passos] = origem;
-
-        if(length(rotaFinal[0], tamanho) < length(visitados, tamanho) || length(rotaFinal[0], tamanho) == 0){
-            if(contem(visitados, tamanho, tamanho)) copyList(rotaFinal, visitados, tamanho);
-        }
-
-        if(origem != destino){
-            int **retorno = montaRota(gr, (*gr)->arestas[origem-1], destino, visitados, rotaFinal, passos+1);
-            if(length(*rotaFinal, tamanho) > length(*retorno, tamanho)) rotaFinal = retorno;
-            visitados[passos+1] = 0;
-        }
-    }
-    return rotaFinal;
-}
-
-void montaTubo(Grafo **gr, int **estados, int tam){
-    for(int i = 0; i < tam; i++){
-        int *aux = proxEstado(estados[i]);
-        for(int j = 0; j < tam; j++){
-            if(ehIgual(estados[j], aux)){
-                inserirAresta(gr, i+1, j+1, 0, 1);
-            }
-        }
-    }
-}
-
-int * proxEstado(int *estado){
-    int *aux;
-    //printf("estado: "); printEstado(estado);
-    if(temColisao(estado)){
-        //printf("Tem colisao\n");
-        if(temSaida(estado)){
-            //printf("Tem saida\n");
-            aux = resolveSaida(estado);
-            estado = aux;
-            //printf("aux pos saida: "); printEstado(aux);
-        }
-        aux = resolveColisao(estado);
-        //printf("aux pos colisao: "); printEstado(aux);
-    } else if(temSaida(estado)){
-        //printf("Tem saida\n");
-        aux = resolveSaida(estado);
-        //printf("aux pos saida: "); printEstado(aux);
-    }
-
-    //printf("---------------\n");
-
-    return aux;
+int tamaEst(int *estado){
+    int tam=0;
+    for(tam=0;estado[tam]!=0;tam++);
+    return tam;
 }
 
 int temColisao(int *estado){
-    int houveColisao = 0;
-    int tam = tamEstado(estado);
-    for(int i = 0; i < tam-1 && houveColisao == 0; i++){
-        if(estado[i] == 1 && estado[i+1] == -1) houveColisao = 1;
-    }
-    return houveColisao;
+    int retorno=0;
+    int tam=tamaEst(estado);
+    for(int i=0;i<tam-1 && retorno==0;i++)
+        if(estado[i]==1 && estado[i+1]==-1) retorno=1;
+    return retorno;
 }
 
 int temSaida(int *estado){
-    int houveColisao = 0;
-    int tam = tamEstado(estado);
-    if(estado[0] == -1 || estado[tam-1] == 1) houveColisao = 1;
-    return houveColisao;
+    int retorno=0;
+    int tam=tamaEst(estado);
+    if(estado[0]==-1 || estado[tam-1]==1) retorno=1;
+    return retorno;
 }
 
-int * resolveSaida(int *estado){
-    int tam = tamEstado(estado);
-    int *aux, newTam = tam, i = 0, cont = 0;
-    if(estado[0] == -1) {
-        newTam -= 1;
-        i = 1;
+int *tira(int *estado){
+    int ini=0,end=tamaEst(estado),novoTam=end;
+    if(estado[ini]==-1){
+        novoTam-=1;
+        ini=1;
     }
-    if(estado[tam-1] == 1) {
-        newTam -= 1;
-        tam -= 1;
+    if(estado[end-1]==1){
+        novoTam-=1;
+        end-=1;
     }
-
-    aux = calloc(newTam, sizeof(int));  
-    for(i; i < tam; i++, cont++){
-        aux[cont] = estado[i];
+    int *NovoEstado=(int*)malloc(sizeof(int)*novoTam);
+    int cont=0;
+    for(int i=ini;i<end;i++,cont++){
+        NovoEstado[cont]=estado[i];
     }
-
-    return aux;
-}
-
-int * resolveColisao(int *estado){
-    int tam = tamEstado(estado);
-    int *aux = calloc(tam, sizeof(int));
-
-    for(int i = 0; i < tam; i++){
-        aux[i] = estado[i];
-    }
-
-    for(int i = 0; i < tam-1; i++){
-        if(aux[i] == 1 && aux[i+1] == -1){
-            aux[i] *= -1;
-            aux[i+1] *= -1;
-            i+=1;
-        }
-    }
-
-    return aux;
-}
-
-int ehIgual(int *estado1, int *estado2){
-    int ehIgual = 1;
-
-    int tam = tamEstado(estado1);
-    if(tam == tamEstado(estado2)){
-        for(int i = 0; i < tam && ehIgual != 0; i++){
-            if(estado1[i] != estado2[i]) ehIgual = 0;
-        }
-    } else ehIgual = 0;
-
-    return ehIgual;
-}
-
-int tamEstado(int *estado){
-    int i;
-    for(i = 0; estado[i] != 0; i++);
-    return i;
-}
-
-int contem(int *lista, int tam, int num){
-    int contem = 0;
-
-    for(int i = 0; i < tam; i++)
-        if(lista[i] == num) contem = 1;
-    
-    return contem;
-}
-
-int length(int *lista, int tam){
-    int cont = 0;
-    for(int i = 1; i < tam && lista[i] != 0; i++, cont++);
-    return cont;
-}
-
-void copyList(int **copia, int *original, int tam){
-    int i = 0;
-    for(i = 0; i < tam && original[i] != 0; i++, copia[0][i] = original[i]);
-    for(i; i < tam; i++) copia[0][i] = 0;
+    return NovoEstado;
 }
 
 void printEstado(int *estado){
-    int tam = tamEstado(estado);
-    
-    printf("(");
-    for(int i = 0; i < tam-1; i++) printf("%d,", estado[i]);
-    printf("%d)\n", estado[tam-1]);
+    int tam = tamaEst(estado);
+        printf("(");
+        for(int i = 0; i < tam-1; i++) printf("%d,", estado[i]);
+        printf("%d)\n", estado[tam-1]);  
+}
+
+int *tiraC(int *estado){
+    int tam=tamaEst(estado);
+    int *prox=(int*)malloc(sizeof(int*)*tam);
+    for(int i=0;i<tam;i++){
+        prox[i]=estado[i];
+    }
+    for(int i=0;i<tam-1;i++){
+        if(prox[i]==1 && prox[i+1]==-1){
+            prox[i]*=-1;
+            prox[i+1]*=-1;
+            i++;
+        }
+    }
+    return prox;
+}
+
+int *proximoEstado(int *estAtual){
+    int *prox;
+    if(temColisao(estAtual)){
+        if(temSaida(estAtual)){
+            prox=tira(estAtual);
+            estAtual=prox;
+        }
+        prox=tiraC(estAtual);
+
+    }else if(temSaida(estAtual)){
+        prox=tira(estAtual);
+    }
+    return prox;
+}
+
+int igual(int *est,int *est2){
+    int t=tamaEst(est2);
+    int retorno=1;
+    for(int i=0;i<t && retorno==1;i++){
+        if(est[i]!=est2[i]) retorno=0;
+    }
+    return retorno;
+}
+
+int procuraEst(int **estados,int *estado){
+    int retorno = -1;
+    for(int i=0;i<31 && retorno==-1;i++){
+        int t=tamaEst(estados[i]);
+        if(t==tamaEst(estado)){
+            if(igual(estados[i],estado)){
+                retorno=i;
+            }
+        }
+    }
+}
+
+void LigarEstados(Estados *est,int numeroEstados){
+    for(int i=0;i<numeroEstados;i++){
+        int *prox=proximoEstado(est->mat[i]);
+        int dest=procuraEst(est->mat,prox);
+        //printf("DES: %d\n",dest );
+        insereAresta(&est->gr,i,dest,0,1);
+    }
+}
+
+void adj(Estados *est){
+    for(int i=0;i<30;i++){
+        printf("Estado %d ",i);printEstado(est->mat[i]);
+        for(int j=0;j<est->gr->grau[i];j++){
+            printf("Vai para o Estado %d ",est->gr->arestas[i][j]);printEstado(est->mat[est->gr->arestas[i][j]]);
+        }
+    }
+}
+
+void push(int v, Pilha **p){
+    Pilha *cel=(Pilha*)malloc(sizeof(Pilha));
+    cel->n=v;
+    cel->prox=*p;
+    *p=cel;
+}
+
+int MontaCam(Grafos *gr,int atual,Pilha **caminho,int *cont){
+    int i;
+    push(atual,caminho);
+    for(i=0; i<gr->grau[atual]; i++){
+        *cont+=1;
+        MontaCam(gr, gr->arestas[atual][i], caminho, cont);
+    }
+}
+
+void exibePilha(Pilha *P,Estados *est){
+    Pilha *aux = P;
+    if(aux!=NULL){
+        exibePilha(P->prox,est);
+        printf("%d:",aux->n);printEstado(est->mat[aux->n]);
+    }
 }
