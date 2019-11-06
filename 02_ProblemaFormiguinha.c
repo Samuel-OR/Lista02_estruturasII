@@ -260,9 +260,8 @@ int main(){
     
     construirGrafo(grafo,estados, 30);
     
-    mostrarEstados(estados, 31);
-    mostrarArestas(grafo, 31);
-
+    //mostrarEstados(estados, 31);
+    //mostrarArestas(grafo, 31);
 
     printf("Insira posição inicial (ex: [1 -1 1 -1] => ");
     scanf("%d %d %d %d", &vet[0],&vet[1],&vet[2],&vet[3]);
