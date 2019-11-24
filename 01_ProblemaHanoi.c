@@ -12,7 +12,6 @@ typedef struct{
 	float** pesos;
 	int* grau;
 	int grau_max;
-
 	int nivel[81];
 }Grafo;
 
@@ -341,6 +340,7 @@ int equivalente(int **estadoTorre, int *vet){
             resul = i;
         }
     }
+    printf("POSIÇÃO: %d\n",resul );
     return resul;
 }
 
@@ -357,6 +357,16 @@ int main(){
 	construirGrafo(grafo, estadoTorre, possibilidades);
 	
 	nivelLargura(grafo,0);
+	
+	for(int i =0; i<81; i++){
+		printf("%d|",i+1);
+		for(int x=0; x<grafo->grau[i]; x++){
+			printf("%d ",grafo->arestas[i][x] );
+		}
+		printf("\n");
+	}
+
+
 
 	int vet[4];
 	printf("Digite  posição de inicio (Ex: [1 1 1 1]): ");
